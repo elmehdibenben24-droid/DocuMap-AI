@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المساعد الذكي - دليل الاستعمال</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex overflow-hidden">
+
+    <!-- القائمة الجانبية: دليل الاستعمال والوثائق -->
+    <aside class="w-1/3 bg-white border-l border-gray-200 flex flex-col hidden md:flex">
+        <div class="p-6 border-b border-gray-200 bg-blue-600 text-white">
+            <h1 class="text-xl font-bold"><i class="fa-solid fa-book-open mr-2 ml-2"></i> دليل الاستعمال</h1>
+            <p class="text-sm text-blue-100 mt-1">الوثائق والأسئلة المتكررة</p>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto">
+            <!-- شريط البحث الداخلي -->
+            <div class="relative mb-6">
+                <input type="text" placeholder="ابحث في الوثائق..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            
+            <!-- لائحة الوثائق (أمثلة) -->
+            <div class="space-y-3">
+                <div class="p-3 border border-gray-100 rounded-lg bg-gray-50 hover:bg-blue-50 cursor-pointer transition">
+                    <h3 class="font-bold text-gray-800 text-sm">كيفية إعداد النظام؟</h3>
+                    <p class="text-xs text-gray-500 mt-1">دليل خطوة بخطوة لإعداد النظام الأولي...</p>
+                </div>
+                <div class="p-3 border border-gray-100 rounded-lg bg-gray-50 hover:bg-blue-50 cursor-pointer transition">
+                    <h3 class="font-bold text-gray-800 text-sm">الاستدلال المكاني للوثائق</h3>
+                    <p class="text-xs text-gray-500 mt-1">شرح كيفية ربط الملفات بالمواقع...</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- الواجهة الرئيسية: المساعد الذكي -->
+    <main class="flex-1 flex flex-col h-full bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white p-4 border-b border-gray-200 flex items-center justify-between shadow-sm">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3 ml-3">
+                    <i class="fa-solid fa-robot text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-800">المساعد الذكي</h2>
+                    <p class="text-xs text-green-500"><i class="fa-solid fa-circle text-[8px] ml-1"></i> متصل</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- منطقة الدردشة -->
+        <div id="chat-box" class="flex-1 p-6 overflow-y-auto flex flex-col space-y-4">
+            <!-- رسالة الترحيب من البوت -->
+            <div class="flex items-start max-w-[80%]">
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white ml-2 flex-shrink-0">
+                    <i class="fa-solid fa-robot text-sm"></i>
+                </div>
+                <div class="bg-white p-3 rounded-2xl rounded-tr-none shadow-sm border border-gray-100">
+                    <p class="text-sm text-gray-800">مرحباً! أنا المساعد الذكي الخاص بدليل الاستعمال. كيف يمكنني مساعدتك اليوم؟</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- منطقة الإدخال -->
+        <div class="p-4 bg-white border-t border-gray-200">
+            <div class="flex items-center bg-gray-50 border border-gray-300 rounded-full px-4 py-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+                <input id="user-input" type="text" placeholder="اسأل عن أي شيء في الوثائق..." class="flex-1 bg-transparent border-none focus:outline-none text-gray-800 text-sm px-2">
+                <button id="send-btn" class="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition disabled:opacity-50">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript Core -->
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // وظيفة إضافة رسالة للواجهة
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex items-start max-w-[80%] ${sender === 'user' ? 'mr-auto flex-row-reverse' : ''}`;
+            
+            const icon = sender === 'user' 
+                ? `<div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white mr-2 flex-shrink-0"><i class="fa-solid fa-user text-sm"></i></div>`
+                : `<div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white ml-2 flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div>`;
+            
+            const bubble = `<div class="${sender === 'user' ? 'bg-blue-600 text-white rounded-tl-none' : 'bg-white text-gray-800 border border-gray-100 rounded-tr-none shadow-sm'} p-3 rounded-2xl">
+                                <p class="text-sm">${text}</p>
+                            </div>`;
+            
+            msgDiv.innerHTML = sender === 'user' ? bubble + icon : icon + bubble;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // إرسال الرسالة
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // إظهار رسالة المستخدم
+            appendMessage(text, 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // هنا غنصاوبو الاتصال مع Vercel API من بعد
+            // حاليا غنديرو محاكاة لرد البوت (Simulation)
+            setTimeout(() => {
+                appendMessage("أنا حالياً في مرحلة التطوير. قريباً سأتمكن من البحث في الوثائق والإجابة على سؤالك باستخدام الذكاء الاصطناعي!", 'bot');
+                sendBtn.disabled = false;
+            }, 1000);
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
+
