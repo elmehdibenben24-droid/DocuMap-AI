@@ -14,6 +14,8 @@
         @supports not (height: 100dvh) {
             body { height: -webkit-fill-available; }
         }
+        /* كود باش تبان الرسالة أنيقة ومقادة */
+        .msg-content { line-height: 1.6; }
     </style>
 </head>
 <body class="bg-gray-50 flex flex-col md:flex-row">
@@ -35,14 +37,12 @@
                 <input type="text" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="ابحث في الوثائق..." class="w-full px-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
                 <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
             </div>
-            
-            <!-- أضفنا بعض المحتوى هنا باش تبان القائمة عامرة -->
             <div class="space-y-2 mt-4">
                 <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100 transition">
-                    <p class="text-sm font-medium text-gray-800"><i class="fa-solid fa-file-lines text-blue-500 ml-2"></i>كيفية الاستخدام</p>
+                    <p class="text-sm font-medium text-gray-800"><i class="fa-solid fa-file-lines text-blue-500 mx-2"></i>نظرة عامة على المشروع</p>
                 </div>
                  <div class="p-3 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100 transition">
-                    <p class="text-sm font-medium text-gray-800"><i class="fa-solid fa-shield-halved text-blue-500 ml-2"></i>سياسة الخصوصية</p>
+                    <p class="text-sm font-medium text-gray-800"><i class="fa-solid fa-shield-halved text-blue-500 mx-2"></i>سياسة الخصوصية</p>
                 </div>
             </div>
         </div>
@@ -65,7 +65,7 @@
                     <i class="fa-solid fa-robot text-sm"></i>
                 </div>
                 <div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-sm text-gray-800" id="welcome-msg">مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟</p>
+                    <p class="text-sm text-gray-800 msg-content" id="welcome-msg">مرحباً! أنا المساعد الذكي لمشروع MakanAI (Docu Map AI). كيف يمكنني مساعدتك اليوم؟</p>
                 </div>
             </div>
         </div>
@@ -81,39 +81,18 @@
     </main>
 
     <script>
+        // ⚠️ مهم جداً: حط API Key ديالك هنا (شرحت ليك لتحت كيفاش تجيبو فابور)
+        const GEMINI_API_KEY = 'حط_الكود_ديال_API_هنا';
+
         const i18n = {
             ar: { 
-                docTitle: "دليل الاستعمال", 
-                docSub: "الوثائق والأسئلة المتكررة", 
-                searchPlaceholder: "ابحث في الوثائق...", 
-                botName: "المساعد الذكي", 
-                online: "متصل", 
-                inputPlaceholder: "اسأل عن أي شيء...", 
-                welcome: "مرحباً! أنا المساعد الذكي. كيف يمكنني مساعدتك اليوم؟", 
-                errorMsg: "عذراً، وقع خطأ.",
-                botReplyPrefix: "لقد قلت: "
+                docTitle: "دليل الاستعمال", docSub: "الوثائق والأسئلة المتكررة", searchPlaceholder: "ابحث في الوثائق...", botName: "المساعد الذكي", online: "متصل", inputPlaceholder: "اسأل عن أي شيء...", welcome: "مرحباً! أنا المساعد الذكي لمشروع MakanAI (Docu Map AI). كيف يمكنني مساعدتك اليوم؟", errorMsg: "عذراً، لم أتمكن من الاتصال بالذكاء الاصطناعي. المرجو التحقق من مفتاح API."
             },
             fr: { 
-                docTitle: "Guide d'utilisation", 
-                docSub: "Documents et FAQ", 
-                searchPlaceholder: "Rechercher...", 
-                botName: "Assistant Intelligent", 
-                online: "En ligne", 
-                inputPlaceholder: "Posez votre question...", 
-                welcome: "Bonjour ! Je suis l'assistant intelligent. Comment puis-je vous aider ?", 
-                errorMsg: "Désolé, une erreur s'est produite.",
-                botReplyPrefix: "Vous avez dit : "
+                docTitle: "Guide d'utilisation", docSub: "Documents et FAQ", searchPlaceholder: "Rechercher...", botName: "Assistant Intelligent", online: "En ligne", inputPlaceholder: "Posez votre question...", welcome: "Bonjour ! Je suis l'assistant intelligent de MakanAI. Comment puis-je vous aider ?", errorMsg: "Désolé, impossible de se connecter à l'IA. Vérifiez la clé API."
             },
             en: { 
-                docTitle: "User Guide", 
-                docSub: "Docs & FAQ", 
-                searchPlaceholder: "Search documents...", 
-                botName: "Smart Assistant", 
-                online: "Online", 
-                inputPlaceholder: "Ask anything...", 
-                welcome: "Hello! I am the smart assistant. How can I help you?", 
-                errorMsg: "Sorry, an error occurred.",
-                botReplyPrefix: "You said: "
+                docTitle: "User Guide", docSub: "Docs & FAQ", searchPlaceholder: "Search documents...", botName: "Smart Assistant", online: "Online", inputPlaceholder: "Ask anything...", welcome: "Hello! I am the MakanAI Smart Assistant. How can I help you?", errorMsg: "Sorry, couldn't connect to AI. Please check the API key."
             }
         };
 
@@ -127,18 +106,8 @@
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const icon = el.querySelector('i');
-                // حفظ الأيقونة إذا كانت موجودة وإضافتها للنص الجديد
                 let iconHTML = icon ? icon.outerHTML : '';
-                el.innerHTML = i18n[currentLang][el.getAttribute('data-i18n')];
-                
-                // إعادة الأيقونة في المكان المناسب حسب اللغة (في العربية على اليمين، اللغات الأخرى على اليسار)
-                if(iconHTML){
-                   if(currentLang === 'ar'){
-                       el.innerHTML = iconHTML + ' ' + el.innerHTML;
-                   } else {
-                       el.innerHTML = iconHTML + ' ' + el.innerHTML;
-                   }
-                }
+                el.innerHTML = iconHTML + ' ' + i18n[currentLang][el.getAttribute('data-i18n')];
             });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 el.placeholder = i18n[currentLang][el.getAttribute('data-i18n-placeholder')];
@@ -158,51 +127,72 @@
 
         function appendMessage(text, sender) {
             const msgDiv = document.createElement('div');
-            
-            // تعديل اتجاه الرسالة حسب من أرسلها
-            if (sender === 'user') {
-                // رسالة المستخدم (دائما على اليمين في العربية، واليسار في اللغات الأخرى)
-                msgDiv.className = `flex items-start max-w-[80%] self-end flex-row-reverse`;
-            } else {
-                // رسالة الروبوت
-                msgDiv.className = `flex items-start max-w-[80%] self-start`;
-            }
+            msgDiv.className = sender === 'user' 
+                ? `flex items-start max-w-[80%] self-end flex-row-reverse` 
+                : `flex items-start max-w-[80%] self-start`;
 
             const icon = sender === 'user'
                 ? `<div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white mx-2 flex-shrink-0"><i class="fa-solid fa-user text-sm"></i></div>`
                 : `<div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white mx-2 flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div>`;
 
             const bubble = `<div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-gray-100 shadow-sm'} p-3 rounded-2xl">
-                                <p class="text-sm whitespace-pre-wrap">${escapeHTML(text)}</p>
+                                <p class="text-sm whitespace-pre-wrap msg-content">${escapeHTML(text)}</p>
                             </div>`;
 
-            // ترتيب الأيقونة والفقاعة
-            if (sender === 'user') {
-                 msgDiv.innerHTML = icon + bubble;
-            } else {
-                 msgDiv.innerHTML = icon + bubble;
-            }
-           
+            msgDiv.innerHTML = icon + bubble;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv; // كنرجعو الديف باش نقدر نمسح رسالة "جاري التفكير" من بعد
         }
 
-        // هنا صلحنا المشكل! حيدنا الـ fetch ديال السيرفر وعوضناها بتفاعل بسيط
-        function sendMessage() {
+        async function sendMessage() {
             const text = userInput.value.trim();
             if (!text) return;
 
+            // إظهار رسالة المستخدم
             appendMessage(text, 'user');
             userInput.value = '';
             sendBtn.disabled = true;
 
-            // محاكاة وقت التفكير ديال الذكاء الاصطناعي (1 ثانية)
-            setTimeout(() => {
-                const reply = i18n[currentLang].botReplyPrefix + '"' + text + '"' + "\\nكيفاش نقدر نزيد نعاونك؟";
-                appendMessage(reply, 'bot');
+            // إظهار علامة التحميل (جاري التفكير...)
+            const loadingMsg = appendMessage('جاري التفكير...', 'bot');
+
+            // إعطاء شخصية للمساعد باش يجاوب بطريقة احترافية على حساب المشروع
+            const systemPrompt = `أنت المساعد الذكي الرسمي لمشروع يسمى "MakanAI" (أو Docu Map AI). 
+            مهمتك هي الإجابة على أسئلة المستخدمين بمهنية واحترافية ووضوح. 
+            إذا سألك المستخدم عن المشروع، أخبره أنه نظام ذكي لإدارة الوثائق.
+            أجب باللغة التي يتحدث بها المستخدم. 
+            سؤال المستخدم: ${text}`;
+
+            try {
+                // الاتصال بـ API ديال Google Gemini
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // مسح رسالة التحميل
+                chatBox.removeChild(loadingMsg);
+
+                if (response.ok && data.candidates && data.candidates.length > 0) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    appendMessage(aiReply, 'bot');
+                } else {
+                    appendMessage(i18n[currentLang].errorMsg, 'bot');
+                }
+
+            } catch (error) {
+                chatBox.removeChild(loadingMsg);
+                appendMessage(i18n[currentLang].errorMsg, 'bot');
+            } finally {
                 sendBtn.disabled = false;
                 userInput.focus();
-            }, 1000);
+            }
         }
 
         sendBtn.addEventListener('click', sendMessage);
