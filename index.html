@@ -14,7 +14,6 @@
         @supports not (height: 100dvh) {
             body { height: -webkit-fill-available; }
         }
-        /* كود باش تبان الرسالة أنيقة ومقادة */
         .msg-content { line-height: 1.6; }
     </style>
 </head>
@@ -81,13 +80,135 @@
     </main>
 
     <script>
-        // ⚠️ مهم جداً: حط API Key ديالك هنا (شرحت ليك لتحت كيفاش تجيبو فابور)
+        // ⚠️ مهم جداً: حط API Key ديالك هنا بين هادوك جوج شرطات
         const GEMINI_API_KEY = 'حط_الكود_ديال_API_هنا';
 
         const i18n = {
             ar: { 
-                docTitle: "دليل الاستعمال", docSub: "الوثائق والأسئلة المتكررة", searchPlaceholder: "ابحث في الوثائق...", botName: "المساعد الذكي", online: "متصل", inputPlaceholder: "اسأل عن أي شيء...", welcome: "مرحباً! أنا المساعد الذكي لمشروع MakanAI (Docu Map AI). كيف يمكنني مساعدتك اليوم؟", errorMsg: "عذراً، لم أتمكن من الاتصال بالذكاء الاصطناعي. المرجو التحقق من مفتاح API."
+                docTitle: "دليل الاستعمال", docSub: "الوثائق والأسئلة المتكررة", searchPlaceholder: "ابحث في الوثائق...", botName: "المساعد الذكي", online: "متصل", inputPlaceholder: "اسأل عن أي شيء...", welcome: "مرحباً بك. أنا المساعد الذكي لنظام MakanAI. كيف يمكنني مساعدتك في استخراج الوثائق اليوم؟", errorMsg: "عذراً، لم أتمكن من الاتصال بالنظام. المرجو المحاولة لاحقاً."
             },
+            fr: { 
+                docTitle: "Guide d'utilisation", docSub: "Documents et FAQ", searchPlaceholder: "Rechercher...", botName: "Assistant Intelligent", online: "En ligne", inputPlaceholder: "Posez votre question...", welcome: "Bonjour. Je suis l'assistant intelligent de MakanAI. Comment puis-je vous aider à trouver vos documents aujourd'hui ?", errorMsg: "Désolé, impossible de se connecter au système. Veuillez réessayer plus tard."
+            },
+            en: { 
+                docTitle: "User Guide", docSub: "Docs & FAQ", searchPlaceholder: "Search documents...", botName: "Smart Assistant", online: "Online", inputPlaceholder: "Ask anything...", welcome: "Hello. I am the MakanAI Smart Assistant. How can I help you find your documents today?", errorMsg: "Sorry, couldn't connect to the system. Please try again later."
+            }
+        };
+
+        let currentLang = 'ar';
+
+        document.getElementById('lang-switch').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('html-root').setAttribute('dir', dir);
+            document.getElementById('html-root').setAttribute('lang', currentLang);
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const icon = el.querySelector('i');
+                let iconHTML = icon ? icon.outerHTML : '';
+                el.innerHTML = iconHTML + ' ' + i18n[currentLang][el.getAttribute('data-i18n')];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                el.placeholder = i18n[currentLang][el.getAttribute('data-i18n-placeholder')];
+            });
+            document.getElementById('welcome-msg').innerText = i18n[currentLang].welcome;
+        });
+
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.innerText = str;
+            return div.innerHTML;
+        }
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = sender === 'user' 
+                ? `flex items-start max-w-[80%] self-end flex-row-reverse` 
+                : `flex items-start max-w-[80%] self-start`;
+
+            const icon = sender === 'user'
+                ? `<div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-white mx-2 flex-shrink-0"><i class="fa-solid fa-user text-sm"></i></div>`
+                : `<div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white mx-2 flex-shrink-0"><i class="fa-solid fa-robot text-sm"></i></div>`;
+
+            const bubble = `<div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white text-gray-800 border border-gray-100 shadow-sm'} p-3 rounded-2xl">
+                                <p class="text-sm whitespace-pre-wrap msg-content">${escapeHTML(text)}</p>
+                            </div>`;
+
+            msgDiv.innerHTML = icon + bubble;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv; 
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // ميساج ديال التحميل باش يبان داكشي حقيقي واحترافي
+            const loadingMsgText = currentLang === 'ar' ? 'جاري البحث في الوثائق...' : (currentLang === 'fr' ? 'Recherche dans les documents...' : 'Searching documents...');
+            const loadingMsg = appendMessage(loadingMsgText, 'bot');
+
+            // هادا هو العقل ديال المساعد لي غيخليه يهضر بحال شي موظف محترف
+            const systemPrompt = `أنت المساعد الذكي الرسمي لنظام "Docu Map AI" (ويعرف أيضاً بـ MakanAI).
+            مهمتك هي الإجابة على أسئلة المستخدمين (الذين هم غالباً موظفون أو عملاء محتملون) باحترافية عالية، وضوح، ولغة رسمية ومهذبة.
+
+            **معلومات عن النظام الذي تمثله:**
+            - النظام هو منصة ذكية تقوم بجمع وإدارة الوثائق والأسئلة الداخلية للمؤسسات في مكان واحد منظم.
+            - الهدف الرئيسي للنظام هو تسهيل البحث عن المعلومات، مما يوفر الوقت والمجهود على الموظفين (خاصة الجدد منهم).
+            - يعمل النظام كدليل استعمال ذكي ومساعد في البحث السريع.
+
+            **تعليمات هامة للإجابة:**
+            - لا تستخدم أبداً عبارات عامية أو قدحية أو لغة الشارع.
+            - استخدم لغة مؤسساتية رسمية واحترافية تعكس قيمة النظام العالية.
+            - أجب دائماً بنفس اللغة التي طرح بها المستخدم سؤاله (عربية فصحى، فرنسية رسمية، أو إنجليزية احترافية).
+            - إذا كان السؤال عاماً أو ترحيبياً، رحب بالمستخدم بطريقة لبقة واسأله كيف يمكنك مساعدته في استخراج الوثائق أو الإجابة على استفساراته لتوفير وقته.
+
+            سؤال المستخدم: ${text}`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                chatBox.removeChild(loadingMsg);
+
+                if (response.ok && data.candidates && data.candidates.length > 0) {
+                    const aiReply = data.candidates[0].content.parts[0].text;
+                    appendMessage(aiReply, 'bot');
+                } else {
+                    appendMessage(i18n[currentLang].errorMsg, 'bot');
+                }
+
+            } catch (error) {
+                chatBox.removeChild(loadingMsg);
+                appendMessage(i18n[currentLang].errorMsg, 'bot');
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
             fr: { 
                 docTitle: "Guide d'utilisation", docSub: "Documents et FAQ", searchPlaceholder: "Rechercher...", botName: "Assistant Intelligent", online: "En ligne", inputPlaceholder: "Posez votre question...", welcome: "Bonjour ! Je suis l'assistant intelligent de MakanAI. Comment puis-je vous aider ?", errorMsg: "Désolé, impossible de se connecter à l'IA. Vérifiez la clé API."
             },
